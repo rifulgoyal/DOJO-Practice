@@ -2,19 +2,19 @@
 
 A community-built collection of **Kalvium Coding Workout and Dojo questions**, each with the question and a working solution. Attempted a question? Add a screenshot and help the next student.
 
-<!--BADGE_START-->![Questions](https://img.shields.io/badge/Questions-7-blue)<!--BADGE_END-->
+<!--BADGE_START-->![Questions](https://img.shields.io/badge/Questions-6-blue)<!--BADGE_END-->
 ![Contributions welcome](https://img.shields.io/badge/Contributions-welcome-brightgreen)
 
 ---
 
 ## 📊 Live Stats
 
-**Total questions: <!--COUNT_START-->7<!--COUNT_END-->** · Last updated: <!--DATE_START-->25 Oct 2026<!--DATE_END-->
+**Total questions: <!--COUNT_START-->6<!--COUNT_END-->** · Last updated: <!--DATE_START-->25 Oct 2026<!--DATE_END-->
 
 <!--STATS_START-->
 | Language | Workout | Dojo | Total |
 |----------|--------:|-----:|------:|
-| [JAVA](JAVA/) | 3 | 1 | 4 |
+| [JAVA](JAVA/) | 3 | 0 | 3 |
 | [PYTHON](PYTHON/) | 3 | 0 | 3 |
 
 > ⚠️ **6** workout question(s) don't have a level yet. Help by moving them into a `LEVEL-N` folder!
