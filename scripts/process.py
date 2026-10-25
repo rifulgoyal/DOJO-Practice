@@ -235,11 +235,11 @@ def update_readme(items):
     text = readme.read_text(encoding="utf-8")
     count = len(items)
     date = datetime.now(timezone.utc).strftime("%d %b %Y")
-    badge = f"![Questions](https://img.shields.io/badge/Questions-{count}-blue)"
+    badge = f'<img src="https://img.shields.io/badge/Questions-{count}-blue" alt="Questions">'
     text = sub_marker(text, "<!--COUNT_START-->", "<!--COUNT_END-->", str(count))
     text = sub_marker(text, "<!--DATE_START-->", "<!--DATE_END-->", date)
     text = sub_marker(text, "<!--BADGE_START-->", "<!--BADGE_END-->", badge)
-    text = sub_marker(text, "<!--STATS_START-->", "<!--STATS_END-->", "\n" + build_stats(items) + "\n")
+    text = sub_marker(text, "<!--STATS_START-->", "<!--STATS_END-->", "\n\n" + build_stats(items) + "\n\n")
     readme.write_text(text, encoding="utf-8")
 
 
