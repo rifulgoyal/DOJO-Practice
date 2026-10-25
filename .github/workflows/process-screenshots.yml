@@ -1,0 +1,46 @@
+name: Process screenshots
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.png'
+      - '**.jpg'
+      - '**.jpeg'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: process-screenshots
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pillow numpy
+
+      - name: Split screenshots and rebuild stats/indexes
+        run: python scripts/process.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "chore: split screenshots and update stats [skip ci]"
+            git pull --rebase
+            git push
+          fi
