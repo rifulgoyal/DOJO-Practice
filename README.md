@@ -2,7 +2,7 @@
 
 A community-built collection of **Kalvium Coding Workout and Dojo questions**, each with the question and a working solution. Attempted a question? Add a screenshot and help the next student.
 
-<!--BADGE_START-->![Questions](https://img.shields.io/badge/Questions-7-blue)<!--BADGE_END-->
+<!--BADGE_START--><img src="https://img.shields.io/badge/Questions-7-blue" alt="Questions"><!--BADGE_END-->
 ![Contributions welcome](https://img.shields.io/badge/Contributions-welcome-brightgreen)
 
 ---
