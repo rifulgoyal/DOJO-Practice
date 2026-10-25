@@ -4,19 +4,14 @@ Dojo Practice bot.
 
 1. Finds RAW screenshots (.png/.jpg, not already question.jpg / solution.jpg)
    inside  <LANGUAGE>/WORKOUT/  or  <LANGUAGE>/DOJO/
-2. Splits each one into the question half (left) and the solution half (right)
-3. Saves them as  .../LEVEL-N/<problem>/question.jpg + solution.jpg
-   (or  .../<problem>/ when no level is known)
-4. Deletes the raw file
-5. Rebuilds the stats in README.md and one index page per language (<LANGUAGE>/README.md)
-
-Raw filename tips (both WORKOUT and DOJO):
-  JAVA/WORKOUT/L3__Number-pattern.png  -> JAVA/WORKOUT/LEVEL-3/Number-pattern/
-  JAVA/DOJO/L2__Frog-step-counter.png  -> JAVA/DOJO/LEVEL-2/Frog-step-counter/
-  JAVA/DOJO/Frog-step-counter.png      -> JAVA/DOJO/Frog-step-counter/   (level not set)
+2. Checks each one matches the expected format (about 2:1 wide, clear divider)
+3. Good ones: split into  .../LEVEL-N/<problem>/question.jpg + solution.jpg
+4. Bad ones: moved (not deleted) to  _needs-review/<LANGUAGE>/<SECTION>/LEVEL-N/<problem>/original.ext
+5. Rebuilds the stats in README.md and one index page per language
 """
 import os
 import re
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,10 +21,12 @@ import numpy as np
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
+REVIEW_DIR = ROOT / "_needs-review"
 EXTS = {".png", ".jpg", ".jpeg"}
 SECTIONS = {"WORKOUT", "DOJO"}
 PROCESSED_NAMES = {"question", "solution"}
-DEFAULT_SPLIT = 0.35  # fallback if no divider is found
+MIN_RATIO, MAX_RATIO = 1.8, 2.8        # width / height of a good screenshot
+MIN_SPLIT, MAX_SPLIT = 0.25, 0.50      # divider must sit between 25% and 50% of width
 LEVEL_PREFIX = re.compile(r"^[Ll](\d+)__(.+)$")
 LEVEL_DIR = re.compile(r"^LEVEL-(\d+)$", re.I)
 
@@ -37,17 +34,16 @@ LEVEL_DIR = re.compile(r"^LEVEL-(\d+)$", re.I)
 # --------------------------------------------------------------------------
 # Splitting
 # --------------------------------------------------------------------------
-def find_split_x(img: Image.Image) -> int:
-    """Find the first thin dark column (the panel divider) between 25% and 50% width."""
+def find_split_x(img: Image.Image):
+    """Return (x, found). found is False when no clear divider exists."""
     gray = np.asarray(img.convert("L"), dtype=np.float32)
     h, w = gray.shape
     band = gray[int(h * 0.35):int(h * 0.85), :]
     col = band.mean(axis=0)
-    # A real divider is dark on almost every row; a blurred or redacted box is not.
     dark_frac = (band < 110).mean(axis=0)
 
     scores = {}
-    for x in range(int(w * 0.25), int(w * 0.50)):
+    for x in range(int(w * MIN_SPLIT), int(w * MAX_SPLIT)):
         left = col[max(0, x - 8):x - 2]
         right = col[x + 3:x + 9]
         if len(left) == 0 or len(right) == 0:
@@ -59,8 +55,8 @@ def find_split_x(img: Image.Image) -> int:
     for x in sorted(scores):
         if scores[x] > 40:
             window = [k for k in range(x, x + 6) if k in scores]
-            return max(window, key=lambda k: scores[k])
-    return int(w * DEFAULT_SPLIT)
+            return max(window, key=lambda k: scores[k]), True
+    return int(w * 0.35), False
 
 
 def slugify(name: str) -> str:
@@ -68,7 +64,31 @@ def slugify(name: str) -> str:
     return re.sub(r"-{2,}", "-", name).strip("-") or "question"
 
 
-def process_new_images() -> int:
+def unique_path(p: Path) -> Path:
+    n, base = 2, p
+    while p.exists():
+        p = base.with_name(f"{base.stem}-{n}{base.suffix}")
+        n += 1
+    return p
+
+
+def unique_dir(p: Path) -> Path:
+    n, base = 2, p
+    while p.exists():
+        p = base.with_name(f"{base.name}-{n}")
+        n += 1
+    return p
+
+
+def send_to_review(path: Path, rel: Path, level, problem: str, reason: str):
+    folder = REVIEW_DIR / rel.parts[0] / rel.parts[1] / (f"LEVEL-{level}" if level is not None else "unsorted") / problem
+    folder.mkdir(parents=True, exist_ok=True)
+    target = unique_path(folder / f"original{path.suffix.lower()}")
+    shutil.move(str(path), str(target))
+    print(f"REVIEW {rel} ({reason}) -> {target.relative_to(ROOT)}")
+
+
+def process_new_images() -> tuple[int, int]:
     raw_files = []
     for path in ROOT.rglob("*"):
         if not path.is_file() or path.suffix.lower() not in EXTS:
@@ -76,13 +96,13 @@ def process_new_images() -> int:
         rel = path.relative_to(ROOT)
         if len(rel.parts) < 3:  # must be LANG/SECTION/file
             continue
-        if rel.parts[1].upper() not in SECTIONS:
+        if rel.parts[0] == "_needs-review" or rel.parts[1].upper() not in SECTIONS:
             continue
         if path.stem.lower() in PROCESSED_NAMES:
             continue
         raw_files.append(path)
 
-    done = 0
+    done, review = 0, 0
     for path in sorted(raw_files):
         rel = path.relative_to(ROOT)
         section_dir = ROOT / rel.parts[0] / rel.parts[1]
@@ -97,31 +117,38 @@ def process_new_images() -> int:
                 lm = LEVEL_DIR.match(part)
                 if lm:
                     level = int(lm.group(1))
-
         problem = slugify(stem)
-        dest = section_dir / (f"LEVEL-{level}" if level is not None else "") / problem
-
-        n = 2
-        base = dest
-        while dest.exists():
-            dest = base.with_name(f"{base.name}-{n}")
-            n += 1
 
         try:
             img = Image.open(path).convert("RGB")
-        except Exception as exc:  # corrupt upload
-            print(f"SKIP {rel}: cannot open ({exc})", file=sys.stderr)
+        except Exception as exc:
+            print(f"ERROR {rel}: cannot open ({exc})", file=sys.stderr)
+            send_to_review(path, rel, level, problem, "cannot open")
+            review += 1
             continue
 
         w, h = img.size
-        x = find_split_x(img)
+        ratio = w / h
+        x, found = find_split_x(img)
+        split_frac = x / w
+
+        if not (MIN_RATIO <= ratio <= MAX_RATIO):
+            send_to_review(path, rel, level, problem, f"ratio {ratio:.2f}, expected about 2:1")
+            review += 1
+            continue
+        if not found or not (MIN_SPLIT <= split_frac <= MAX_SPLIT):
+            send_to_review(path, rel, level, problem, "no clear question/solution divider")
+            review += 1
+            continue
+
+        dest = unique_dir(section_dir / (f"LEVEL-{level}" if level is not None else "") / problem)
         dest.mkdir(parents=True)
         img.crop((0, 0, x, h)).save(dest / "question.jpg", quality=90)
         img.crop((x, 0, w, h)).save(dest / "solution.jpg", quality=90)
         path.unlink()
         print(f"SPLIT {rel} at x={x}/{w} -> {dest.relative_to(ROOT)}")
         done += 1
-    return done
+    return done, review
 
 
 # --------------------------------------------------------------------------
@@ -131,6 +158,8 @@ def collect():
     items = []
     for q in ROOT.rglob("question.jpg"):
         rel = q.relative_to(ROOT)
+        if rel.parts[0] == "_needs-review":
+            continue
         if len(rel.parts) < 4 or rel.parts[1].upper() not in SECTIONS:
             continue
         level = None
@@ -146,6 +175,12 @@ def collect():
             "dir": q.parent,
         })
     return items
+
+
+def count_review() -> int:
+    if not REVIEW_DIR.exists():
+        return 0
+    return sum(1 for p in REVIEW_DIR.rglob("original.*") if p.is_file())
 
 
 def img_tag(path: Path, base: Path) -> str:
@@ -205,11 +240,15 @@ def build_stats(items) -> str:
         wk = sum(1 for i in mine if i["section"] == "WORKOUT")
         dj = sum(1 for i in mine if i["section"] == "DOJO")
         rows.append(f"| [{lang}]({quote(lang)}/) | {wk} | {dj} | {len(mine)} |")
-    no_level = sum(1 for i in items if i["level"] is None)
     text = "\n".join(rows)
+    no_level = sum(1 for i in items if i["level"] is None)
     if no_level:
         text += (f"\n\n> ⚠️ **{no_level}** question(s) don't have a level yet. "
                  "Help by moving them into a `LEVEL-N` folder!")
+    pending = count_review()
+    if pending:
+        text += (f"\n\n> 🔍 **{pending}** screenshot(s) need a manual check in "
+                 "[`_needs-review`](_needs-review/) because their format didn't match.")
     return text
 
 
@@ -234,12 +273,12 @@ def update_readme(items):
 
 
 def main():
-    split = process_new_images()
+    split, review = process_new_images()
     items = collect()
     for lang in sorted({i["lang"] for i in items}):
         build_language_page(lang, [i for i in items if i["lang"] == lang])
     update_readme(items)
-    print(f"Done. Split {split} new screenshot(s). Total questions: {len(items)}")
+    print(f"Done. Split {split}, sent {review} to _needs-review. Total questions: {len(items)}")
 
 
 if __name__ == "__main__":
