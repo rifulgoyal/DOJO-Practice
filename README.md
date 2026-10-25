@@ -34,6 +34,9 @@ Click a language above to browse its questions. Every question shows the problem
 - **Missing levels**: some older workout questions don't have a level yet. If you know the level of one, move it into the right `LEVEL-N` folder.
 
 ---
+## 🔍 Screenshot format
+
+The bot expects a full-window screenshot about twice as wide as it is tall, with the question on the left and the code on the right. If your screenshot doesn't match, it isn't lost. It goes into [`_needs-review`](_needs-review/) and a maintainer will check it and sort it manually.
 
 ## 🤝 How to Contribute (no cropping or editing needed)
 
