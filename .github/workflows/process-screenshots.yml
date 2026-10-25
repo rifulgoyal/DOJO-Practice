@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: process-screenshots
@@ -32,15 +33,19 @@ jobs:
       - name: Split screenshots and rebuild stats/indexes
         run: python scripts/process.py
 
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "Nothing to commit"
-          else
-            git commit -m "chore: split screenshots and update stats [skip ci]"
-            git pull --rebase
-            git push
-          fi
+      - name: Open pull request with the changes
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore: split screenshots and update stats"
+          branch: bot/process-screenshots
+          delete-branch: true
+          title: "Process screenshots and update stats"
+          body: "Automated update from the screenshot bot."
+          labels: bot
+
+      - name: Turn on auto-merge
+        if: steps.cpr.outputs.pull-request-number != ''
+        run: gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --auto --squash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
