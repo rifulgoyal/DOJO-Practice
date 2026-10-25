@@ -12,12 +12,12 @@ A community-built collection of **Kalvium Coding Workout and Dojo questions**, e
 **Total questions: <!--COUNT_START-->7<!--COUNT_END-->** · Last updated: <!--DATE_START-->25 Oct 2026<!--DATE_END-->
 
 <!--STATS_START-->
+
 | Language | Workout | Dojo | Total |
 |----------|--------:|-----:|------:|
 | [JAVA](JAVA/) | 3 | 1 | 4 |
 | [PYTHON](PYTHON/) | 3 | 0 | 3 |
 
-> ⚠️ **6** workout question(s) don't have a level yet. Help by moving them into a `LEVEL-N` folder!
 <!--STATS_END-->
 
 Click a language above to browse its questions. Every question shows the problem first, and the solution stays hidden until you click **Show solution**, so you can try it yourself first.
