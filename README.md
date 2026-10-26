@@ -18,8 +18,6 @@ A community-built collection of **Kalvium Coding Workout and Dojo questions**, e
 | [JAVA](JAVA/) | 3 | 1 | 4 |
 | [PYTHON](PYTHON/) | 4 | 0 | 4 |
 
-> 🔍 **2** screenshot(s) need a manual check in [`_needs-review`](_needs-review/) because their format didn't match.
-
 <!--STATS_END-->
 
 Click a language above to browse its questions. Every question shows the problem first, and the solution stays hidden until you click **Show solution**, so you can try it yourself first.
