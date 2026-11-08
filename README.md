@@ -9,7 +9,7 @@ A community-built collection of **Kalvium Coding Workout and Dojo questions**, e
 
 ## 📊 Live Stats
 
-**Total questions: <!--COUNT_START-->11<!--COUNT_END-->** · Last updated: <!--DATE_START-->07 Nov 2026<!--DATE_END-->
+**Total questions: <!--COUNT_START-->11<!--COUNT_END-->** · Last updated: <!--DATE_START-->08 Nov 2026<!--DATE_END-->
 
 <!--STATS_START-->
 
@@ -19,7 +19,7 @@ A community-built collection of **Kalvium Coding Workout and Dojo questions**, e
 | [JS](JS/) | 1 | 0 | 1 |
 | [PYTHON](PYTHON/) | 4 | 0 | 4 |
 
-> 🔍 **3** screenshot(s) need a manual check in [`_needs-review`](_needs-review/) because their format didn't match.
+> 🔍 **4** screenshot(s) need a manual check in [`_needs-review`](_needs-review/) because their format didn't match.
 
 <!--STATS_END-->
 
