@@ -19,7 +19,7 @@ A community-built collection of **Kalvium Coding Workout and Dojo questions**, e
 | [JS](JS/) | 1 | 0 | 1 |
 | [PYTHON](PYTHON/) | 4 | 0 | 4 |
 
-> 🔍 **4** screenshot(s) need a manual check in [`_needs-review`](_needs-review/) because their format didn't match.
+> 🔍 **5** screenshot(s) need a manual check in [`_needs-review`](_needs-review/) because their format didn't match.
 
 <!--STATS_END-->
 
