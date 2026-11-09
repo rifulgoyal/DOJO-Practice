@@ -2,20 +2,20 @@
 
 A community-built collection of **Kalvium Coding Workout and Dojo questions**, each with the question and a working solution. Attempted a question? Add a screenshot and help the next student.
 
-<!--BADGE_START--><img src="https://img.shields.io/badge/Questions-11-blue" alt="Questions"><!--BADGE_END-->
+<!--BADGE_START--><img src="https://img.shields.io/badge/Questions-12-blue" alt="Questions"><!--BADGE_END-->
 ![Contributions welcome](https://img.shields.io/badge/Contributions-welcome-brightgreen)
 
 ---
 
 ## 📊 Live Stats
 
-**Total questions: <!--COUNT_START-->11<!--COUNT_END-->** · Last updated: <!--DATE_START-->09 Nov 2026<!--DATE_END-->
+**Total questions: <!--COUNT_START-->12<!--COUNT_END-->** · Last updated: <!--DATE_START-->09 Nov 2026<!--DATE_END-->
 
 <!--STATS_START-->
 
 | Language | Workout | Dojo | Total |
 |----------|--------:|-----:|------:|
-| [JAVA](JAVA/) | 3 | 3 | 6 |
+| [JAVA](JAVA/) | 4 | 3 | 7 |
 | [JS](JS/) | 1 | 0 | 1 |
 | [PYTHON](PYTHON/) | 4 | 0 | 4 |
 
